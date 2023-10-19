@@ -1,0 +1,9 @@
+<resources>
+    <string name="default_issuer">https://map-adfs10-v.int.polizei.berlin.de/adfs</string>
+    <string name="default_client_id">c1780010-70a7-44d0-b8db-87009266bf08</string>
+    <string name="default_redirect_uri">adfs://de.berlin.polizei.oidcsso.adfs/redirect</string>
+    <string name="default_redirect_uri_logout">adfs://de.berlin.polizei.oidcsso.adfs/redirect</string>
+    <string name="default_scope">openid email profile offline_acces</string>
+    <string name="default_userclaim">persnr</string>
+    <string name="account_type">SSO</string>
+</resources>

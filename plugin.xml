@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        id="cordova-plugin-oidc-configapp"
+        version="1.0.0">
+
+  <name>oidcconfigapp</name>
+
+  <engines>
+    <engine name="cordova" version=">=3.4.0"/>
+  </engines>
+
+  <platform name="android">
+    <framework src="androidx.browser:browser:1.5.0" />
+    <config-file target="res/xml/config.xml" parent="/*">		  
+      <!--feature name="oidcconfigapp">
+        <param name="android-package" value="de.mopsdom.oidc.cordova.oidcconfigapp"/>
+      </feature-->	  	
+    </config-file>
+	<config-file target="AndroidManifest.xml" parent="/*">
+		<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+		<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+		<uses-permission android:name="android.permission.INTERNET" />
+		<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+		<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+		
+		<uses-permission android:name="android.permission.GET_ACCOUNTS" />
+		<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+		<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+		<uses-permission android:name="android.permission.USE_CREDENTIALS" />
+		
+	</config-file>
+	<config-file target="AndroidManifest.xml" parent="/manifest/application">
+	
+		<provider
+			android:name="de.mopsdom.oidc.cordova.ConfigProvider"
+			android:authorities="de.mopsdom.oidc.cordova.configprovider"
+			android:exported="true" />
+	
+		<service android:name="de.mopsdom.oidc.configapp.NotificationtentService"
+            android:exported="true">
+			 <intent-filter>
+				<action android:name="de.mopsdom.oidc.NOTIFY_MESSAGE" />
+			</intent-filter>
+        </service>
+		
+		<service android:name="de.mopsdom.oidc.authenticator.OIDCAuthenticatorService" android:exported="true">
+		   <intent-filter>
+			  <action android:name="android.accounts.AccountAuthenticator" />
+		   </intent-filter>
+		   <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator" />
+		</service>
+     
+        <receiver
+            android:name="de.mopsdom.oidc.configapp.Receiver"
+            android:enabled="true"
+            android:exported="true"
+            android:priority="999" >
+            <intent-filter>
+                <action android:name="android.accounts.action.ACCOUNT_REMOVED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
+            </intent-filter>
+        </receiver>
+	</config-file>
+		
+	<source-file src="src/android/NotificationtentService.java" target-dir="src/de/mopsdom/oidc/configapp"/>	
+	<source-file src="src/android/Receiver.java" target-dir="src/de/mopsdom/oidc/configapp"/>	
+	<source-file src="src/android/ConfigProvider.java" target-dir="src/de/mopsdom/oidc/configapp"/>
+	
+	<source-file src="src/android/OIDCAuthenticator.java" target-dir="src/de/mopsdom/oidc/authenticator"/>
+	<source-file src="src/android/OIDCAuthenticatorService.java" target-dir="src/de/mopsdom/oidc/authenticator"/>
+		
+	<source-file src="src/android/authenticator.xml" target-dir="res/xml"/>	
+	<source-file src="src/android/icon.xml" target-dir="res/drawable"/>
+	<source-file src="src/android/baseline_lock_24.xml" target-dir="res/drawable"/>
+	<source-file src="src/android/baseline_lock_open_24.xml" target-dir="res/drawable"/>	
+	<source-file src="src/android/notification_layout.xml" target-dir="res/layout"/>
+	<source-file src="src/android/notification_layout_large.xml" target-dir="res/layout"/>
+	<source-file src="src/android/strings_oidc.xml" target-dir="res/values"/>
+	<source-file src="src/android/baseline_account_circle_24.xml" target-dir="res/drawable" />
+  </platform>
+
+
+</plugin>
