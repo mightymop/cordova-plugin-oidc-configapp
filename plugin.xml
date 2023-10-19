@@ -32,8 +32,8 @@
 	<config-file target="AndroidManifest.xml" parent="/manifest/application">
 	
 		<provider
-			android:name="de.mopsdom.oidc.cordova.ConfigProvider"
-			android:authorities="de.mopsdom.oidc.cordova.configprovider"
+			android:name="de.mopsdom.oidc.configapp.ConfigProvider"
+			android:authorities="de.mopsdom.oidc.configapp.configprovider"
 			android:exported="true" />
 	
 		<service android:name="de.mopsdom.oidc.configapp.NotificationtentService"

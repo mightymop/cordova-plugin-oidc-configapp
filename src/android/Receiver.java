@@ -16,7 +16,7 @@ import androidx.annotation.RequiresApi;
 
 import org.json.JSONObject;
 
-import de.mopsdom.oidc.utils.Utils;
+import de.mopsdom.oidc.cordova.Utils;
 
 public class Receiver extends BroadcastReceiver {
 

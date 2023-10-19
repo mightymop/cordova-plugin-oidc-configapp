@@ -68,7 +68,7 @@ public class NotificationtentService extends Service {
     customViewBig.setOnClickPendingIntent(getIdByName(context, "notification_button"), pendingIntent);
 
     NotificationCompat.Builder builder = new NotificationCompat.Builder(context,
-      getStringRessource(context, "app_name") + "_CHANNEL_ID")
+      Utils.getStringRessource(context, "app_name") + "_CHANNEL_ID")
       .setSmallIcon(isauth ? getDrawableResourceId(context, "baseline_lock_open_24") : getDrawableResourceId(context, "baseline_lock_24"))
       .setContentTitle("An-/Abmeldung")
       .setCustomBigContentView(customViewBig)
@@ -90,7 +90,7 @@ public class NotificationtentService extends Service {
 
     // Erstelle den Notification-Kanal (erforderlich ab Android 8.0)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      String appname = getStringRessource("app_name");
+      String appname = Utils.getStringRessource(context,"app_name");
       NotificationChannel channel = new NotificationChannel(appname + "_CHANNEL_ID",
         appname, NotificationManager.IMPORTANCE_HIGH);
       notificationManager.createNotificationChannel(channel);
@@ -101,33 +101,11 @@ public class NotificationtentService extends Service {
   }
 
   public static int getLayoutResourceId(Context context, String layoutName) {
-    return getIdentifier(context, "layout", layoutName);
+    return Utils.getIdentifier(context, "layout", layoutName);
   }
 
   public static int getDrawableResourceId(Context context, String layoutName) {
-    return getIdentifier(context, "drawable", layoutName);
-  }
-
-  public static int getIdentifier(Context context, String kategorie, String name) {
-    int resourceId = 0;
-
-    try {
-      resourceId = context.getResources().getIdentifier(name, kategorie, context.getPackageName());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    return resourceId;
-  }
-
-  public static String getStringRessource(Context context, String resourceName) {
-    int resourceId = context.getResources().getIdentifier(resourceName, "string", context.getPackageName());
-
-    if (resourceId != 0) {
-      return context.getResources().getString(resourceId);
-    } else {
-      return null;
-    }
+    return Utils.getIdentifier(context, "drawable", layoutName);
   }
 
   public static void cancelForegroundNotification(Context context) {

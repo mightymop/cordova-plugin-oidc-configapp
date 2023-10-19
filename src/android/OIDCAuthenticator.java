@@ -11,7 +11,8 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import de.mopsdom.oidc.utils.Utils;
+import de.mopsdom.oidc.configapp.Utils;
+
 
 public class OIDCAuthenticator extends AbstractAccountAuthenticator {
   public static final String TOKEN_TYPE_ID = "id_token";
