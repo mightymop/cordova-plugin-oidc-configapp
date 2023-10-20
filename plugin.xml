@@ -68,6 +68,7 @@
 	<source-file src="src/android/NotificationtentService.java" target-dir="src/de/mopsdom/oidc/configapp"/>	
 	<source-file src="src/android/Receiver.java" target-dir="src/de/mopsdom/oidc/configapp"/>	
 	<source-file src="src/android/ConfigProvider.java" target-dir="src/de/mopsdom/oidc/configapp"/>
+	<source-file src="src/android/Utils.java" target-dir="src/de/mopsdom/oidc/configapp"/>
 	
 	<source-file src="src/android/OIDCAuthenticator.java" target-dir="src/de/mopsdom/oidc/authenticator"/>
 	<source-file src="src/android/OIDCAuthenticatorService.java" target-dir="src/de/mopsdom/oidc/authenticator"/>
