@@ -72,7 +72,8 @@ public class ConfigProvider extends ContentProvider {
     } else if (uri.getPath().startsWith("/account")) {
       if (values.containsKey("name")) {
         String name = values.getAsString("name");
-        Utils.createAccount(getContext(), name, null);
+        String state = values.getAsString("state");
+        Utils.createAccount(getContext(), name, state);
         return 1;
       }
     }
