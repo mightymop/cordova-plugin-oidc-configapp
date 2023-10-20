@@ -28,16 +28,21 @@ public class ConfigProvider extends ContentProvider {
   public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
     String result = "";
+    String[] columnNames=null;
     if (uri.getPath().startsWith("/config")) {
+      columnNames = new String[]{"result"};
       result = Utils.readOIDCConfig(getContext());
       if (result == null) {
         loadConfig(Utils.readConfig(getContext()), null);
       }
     } else if (uri.getPath().startsWith("/connectionconfig")) {
+      columnNames = new String[]{"result"};
       result = Utils.readConfig(getContext());
+    } else if (uri.getPath().startsWith("/account")) {
+      result = Utils.readData(getContext(),projection[0]);
+      columnNames = new String[]{projection[0]};
     }
 
-    String[] columnNames = {"result"};
     MatrixCursor cursor = new MatrixCursor(columnNames);
     cursor.addRow(new Object[]{result});
 
@@ -51,7 +56,18 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public Uri insert(Uri uri, ContentValues values) {
-    update(uri, values, null, null);
+    if (uri.getPath().startsWith("/connectionconfig")) {
+      update(uri, values, null, null);
+    } else if (uri.getPath().startsWith("/config")) {
+      update(uri, values, null, null);
+    } else if (uri.getPath().startsWith("/account")) {
+      if (values.containsKey("name")) {
+        String name = values.getAsString("name");
+        String state = values.getAsString("state");
+        Utils.createAccount(getContext(), name, state);
+      }
+    }
+
     return uri;
   }
 
@@ -70,12 +86,9 @@ public class ConfigProvider extends ContentProvider {
         return 1;
       }
     } else if (uri.getPath().startsWith("/account")) {
-      if (values.containsKey("name")) {
-        String name = values.getAsString("name");
-        String state = values.getAsString("state");
-        Utils.createAccount(getContext(), name, state);
-        return 1;
-      }
+        String key = values.getAsString("key");
+        String data = values.getAsString("data");
+        Utils.writeData(getContext(),key,data);
     }
     return 0;
   }
