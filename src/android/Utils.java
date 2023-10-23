@@ -190,7 +190,7 @@ public class Utils {
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pendingIntent = createAlarmIntent(context, id_token);
 
-    long iat = (Long) getClaimFromToken(id_token, "iat");
+    long iat = (Integer) getClaimFromToken(id_token, "iat");
     long alarmTime = iat + refresh_token_expires_in - 60;
     long timeInMillis = alarmTime * 1000;
 
