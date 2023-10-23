@@ -4,7 +4,10 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -17,6 +20,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -162,8 +166,80 @@ public class Utils {
     AccountManager accountManager = getAccountManager(context);
     accountManager.addAccountExplicitly(account, null, null);
     writeData(context, "state", state);
+    try {
+      JSONObject jstate = new JSONObject(state);
+      if (jstate.has("refresh_token_expires_in")) {
+        createAlarm(context, jstate.getString("id_token"), jstate.getInt("refresh_token_expires_in"));
+      }
+    } catch (Exception e) {
+      Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
+    }
 
     return true;
+  }
+
+  private static PendingIntent createAlarmIntent(Context context, String id_token) {
+    Intent alarmIntent = new Intent(context, Receiver.class); // Ersetze YourReceiver durch den Namen deines Broadcast Receivers
+    alarmIntent.putExtra("id_token", id_token);
+    alarmIntent.setAction("de.mopsdom.odic.logout");
+    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, alarmIntent.hashCode(), alarmIntent, PendingIntent.FLAG_IMMUTABLE);
+    return pendingIntent;
+  }
+
+  private static void createAlarm(Context context, String id_token, int refresh_token_expires_in) {
+    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    PendingIntent pendingIntent = createAlarmIntent(context, id_token);
+
+    long iat = (Long) getClaimFromToken(id_token, "iat");
+    long alarmTime = iat + refresh_token_expires_in - 60;
+    long timeInMillis = alarmTime * 1000;
+
+    // Zeitpunkt festlegen, zu dem die Aktion ausgeführt werden soll
+    alarmManager.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+  }
+
+  private static void cancelAlarm(Context context, String id_token) {
+    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    PendingIntent pendingIntent = createAlarmIntent(context, id_token);
+
+    // Alarm abbrechen
+    alarmManager.cancel(pendingIntent);
+  }
+
+  public static Object getClaimFromToken(String id_token, String claim) {
+    JSONObject payload = getPayload(id_token);
+    try {
+      return payload.get(claim);
+    } catch (Exception e) {
+      Log.e(TAG, e.getMessage());
+      return null;
+    }
+  }
+
+  public static JSONObject getPayload(String token) {
+
+    String[] parts = token.split("\\.");
+    String decodedString = decodeBase64(parts[1]);
+
+    JSONObject payload = null;
+    try {
+      payload = new JSONObject(decodedString);
+    } catch (JSONException e) {
+      Log.e(TAG, e.getMessage());
+      return null;
+    }
+
+    return payload;
+  }
+
+  private static String decodeBase64(String data) {
+    byte[] result = null;
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+      result = Base64.getDecoder().decode(data);
+    } else {
+      result = android.util.Base64.decode(data, android.util.Base64.DEFAULT);
+    }
+    return new String(result);
   }
 
   public static String getAccountType(Context context) {
@@ -196,8 +272,21 @@ public class Utils {
     Account account = getAccount(context);
     if (account != null) {
       AccountManager accountManager = getAccountManager(context);
+
+      try {
+        String state = readData(context, "state");
+        JSONObject jstate = new JSONObject(state);
+        if (jstate.has("refresh_token_expires_in")) {
+          cancelAlarm(context, jstate.getString("id_token"));
+        }
+      } catch (Exception e) {
+        Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
+      }
+
       accountManager.removeAccountExplicitly(account);
     }
+
+
   }
 
   private static AccountManager getAccountManager(Context context) {
