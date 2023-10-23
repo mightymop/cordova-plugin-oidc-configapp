@@ -18,7 +18,7 @@ public class Receiver extends BroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
 
-    Log.e("RECEIVER", "onReceive**********************************************");
+    Log.e(Receiver.class.getSimpleName(), "onReceive**********************************************");
 
     if (action.equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED)||action.equalsIgnoreCase("de.mopsdom.odic.logout")) {
 

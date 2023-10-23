@@ -13,6 +13,7 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public boolean onCreate() {
+    Log.d(NotificationtentService.class.getSimpleName(),"onCreate");
     String connectionConfig = Utils.readConfig(getContext());
     String configString = Utils.readOIDCConfig(getContext());
 
@@ -26,7 +27,7 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-
+    Log.d(NotificationtentService.class.getSimpleName(),"query");
     String result = "";
     String[] columnNames=null;
     if (uri.getPath().startsWith("/config")) {
@@ -51,11 +52,14 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public String getType(Uri uri) {
+    Log.d(NotificationtentService.class.getSimpleName(),"getType");
+
     return "application/json";
   }
 
   @Override
   public Uri insert(Uri uri, ContentValues values) {
+    Log.d(NotificationtentService.class.getSimpleName(),"insert");
     if (uri.getPath().startsWith("/connectionconfig")) {
       update(uri, values, null, null);
     } else if (uri.getPath().startsWith("/config")) {
@@ -73,6 +77,7 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    Log.d(NotificationtentService.class.getSimpleName(),"update");
     if (uri.getPath().startsWith("/connectionconfig")) {
       if (values.containsKey("config")) {
         String config = values.getAsString("config");
@@ -95,6 +100,7 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public int delete(Uri uri, String selection, String[] selectionArgs) {
+    Log.d(NotificationtentService.class.getSimpleName(),"delete");
     if (uri.getPath().startsWith("/account")) {
       Utils.removeAccount(getContext());
       return 1;
@@ -103,6 +109,7 @@ public class ConfigProvider extends ContentProvider {
   }
 
   private void loadConfig(String connectionConfig, String configString) {
+    Log.d(NotificationtentService.class.getSimpleName(),"loadConfig");
     if ((configString == null || configString.isEmpty()) && connectionConfig != null && !connectionConfig.isEmpty()) {
       Thread t = new Thread(new Runnable() {
         @Override

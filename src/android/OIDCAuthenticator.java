@@ -12,6 +12,7 @@ import android.util.Log;
 import org.json.JSONObject;
 
 import de.mopsdom.oidc.configapp.Utils;
+import de.mopsdom.oidc.cordova.oidc;
 
 
 public class OIDCAuthenticator extends AbstractAccountAuthenticator {
@@ -24,17 +25,20 @@ public class OIDCAuthenticator extends AbstractAccountAuthenticator {
 
   public OIDCAuthenticator(Context context) {
     super(context);
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"OIDCAuthenticator");
     mContext = context;
   }
 
   @Override
   public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"editProperties");
     return null;
   }
 
   @Override
   public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
 
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"addAccount");
     final Bundle bundle = new Bundle();
     bundle.putInt(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION);
     bundle.putString(AccountManager.KEY_ERROR_MESSAGE, "Diese Methode zur Anmeldung wird nicht unterstützt");
@@ -43,11 +47,15 @@ public class OIDCAuthenticator extends AbstractAccountAuthenticator {
 
   @Override
   public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account, Bundle options) throws NetworkErrorException {
+
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"confirmCredentials");
     return null;
   }
 
   @Override
   public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
+
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"getAuthToken");
     String state = Utils.readData(mContext, "state");
 
     if (state == null) {
@@ -70,6 +78,8 @@ public class OIDCAuthenticator extends AbstractAccountAuthenticator {
   }
 
   public Bundle createTokenBundle(String token, String tokentype, String accountname) {
+
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"createTokenBundle");
     final Bundle result = new Bundle();
     result.putString(AccountManager.KEY_ACCOUNT_NAME, accountname);
     result.putString(AccountManager.KEY_ACCOUNT_TYPE, tokentype);
@@ -79,6 +89,8 @@ public class OIDCAuthenticator extends AbstractAccountAuthenticator {
 
   @Override
   public String getAuthTokenLabel(String authTokenType) {
+
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"getAuthTokenLabel");
     switch (authTokenType) {
       case TOKEN_TYPE_ID:
         return TOKEN_TYPE_ID;
@@ -96,12 +108,15 @@ public class OIDCAuthenticator extends AbstractAccountAuthenticator {
 
   @Override
   public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
+
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"updateCredentials");
     return null;
   }
 
   @Override
   public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account, String[] features) throws NetworkErrorException {
 
+    Log.d(OIDCAuthenticator.class.getSimpleName(),"hasFeatures");
     Log.i(TAG, "ACCOUNT=" + account.name + " (" + account.type + ")");
     for (String itm : features) {
       Log.i(TAG, "hasFeatures: feature=" + itm);

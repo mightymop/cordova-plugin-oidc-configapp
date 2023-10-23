@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
@@ -24,6 +25,7 @@ public class NotificationtentService extends Service {
   private static final int NOTIFICATION_ID = 1;
 
   public static int getIdByName(Context context, String idName) {
+    Log.d(NotificationtentService.class.getSimpleName(),"getIdByName");
     int resourceId = 0;
 
     try {
@@ -35,6 +37,7 @@ public class NotificationtentService extends Service {
 
   public static void showForegroundNotification(Context context, boolean isauth, Bitmap bmp, String persnr, String upn) {
 
+    Log.d(NotificationtentService.class.getSimpleName(),"showForegroundNotification");
     RemoteViews customViewBig = new RemoteViews(context.getPackageName(), getLayoutResourceId(context, "notification_layout_large"));
     RemoteViews customViewNormal = new RemoteViews(context.getPackageName(), getLayoutResourceId(context, "notification_layout"));
 
@@ -101,19 +104,27 @@ public class NotificationtentService extends Service {
   }
 
   public static int getLayoutResourceId(Context context, String layoutName) {
+
+    Log.d(NotificationtentService.class.getSimpleName(),"getLayoutResourceId");
     return Utils.getIdentifier(context, "layout", layoutName);
   }
 
   public static int getDrawableResourceId(Context context, String layoutName) {
+
+    Log.d(NotificationtentService.class.getSimpleName(),"getDrawableResourceId");
     return Utils.getIdentifier(context, "drawable", layoutName);
   }
 
   public static void cancelForegroundNotification(Context context) {
+
+    Log.d(NotificationtentService.class.getSimpleName(),"cancelForegroundNotification");
     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     notificationManager.cancel(NOTIFICATION_ID);
   }
 
   public static Bitmap drawableToBitmap(Drawable drawable) {
+
+    Log.d(NotificationtentService.class.getSimpleName(),"drawableToBitmap");
     if (drawable instanceof BitmapDrawable) {
       return ((BitmapDrawable) drawable).getBitmap();
     }
@@ -131,12 +142,15 @@ public class NotificationtentService extends Service {
 
   @Override
   public void onCreate() {
+
+    Log.d(NotificationtentService.class.getSimpleName(),"onCreate");
     super.onCreate();
   }
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
 
+    Log.d(NotificationtentService.class.getSimpleName(),"onStartCommand");
     if (intent != null && intent.hasExtra("notify")) {
       if (intent.getBooleanExtra("notify", false)) {
         Bitmap bitmap = null;
@@ -167,6 +181,7 @@ public class NotificationtentService extends Service {
 
   @Override
   public IBinder onBind(Intent intent) {
+    Log.d(NotificationtentService.class.getSimpleName(),"onBind");
     return null;
   }
 }
