@@ -165,6 +165,9 @@ public class Utils {
   }
 
   public static boolean createAccount(Context context, String username, String state) {
+    return createAccount(context,username,state,true);
+  }
+  public static boolean createAccount(Context context, String username, String state, boolean alarm) {
     Log.d(Utils.class.getSimpleName(),"createAccount");
     Account account = getAccount(context);
 
@@ -176,13 +179,15 @@ public class Utils {
     AccountManager accountManager = getAccountManager(context);
     accountManager.addAccountExplicitly(account, null, null);
     writeData(context, "state", state);
-    try {
-      JSONObject jstate = new JSONObject(state);
-      if (jstate.has("refresh_token_expires_in")) {
-        createAlarm(context, jstate.getString("id_token"), jstate.getInt("refresh_token_expires_in"));
+    if (alarm) {
+      try {
+        JSONObject jstate = new JSONObject(state);
+        if (jstate.has("refresh_token_expires_in")) {
+          createAlarm(context, jstate.getString("id_token"), jstate.getInt("refresh_token_expires_in"));
+        }
+      } catch (Exception e) {
+        Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
       }
-    } catch (Exception e) {
-      Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
     }
 
     return true;
@@ -191,7 +196,9 @@ public class Utils {
   private static PendingIntent createAlarmIntent(Context context, String id_token) {
     Log.d(Utils.class.getSimpleName(),"createAlarmIntent");
     Intent alarmIntent = new Intent(context, Receiver.class); // Ersetze YourReceiver durch den Namen deines Broadcast Receivers
-    alarmIntent.putExtra("id_token", id_token);
+
+    String issuer = (String) getClaimFromToken(id_token,"iss");
+    alarmIntent.putExtra("issuer", issuer);
     alarmIntent.setAction("de.mopsdom.odic.logout");
     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, alarmIntent.hashCode(), alarmIntent, PendingIntent.FLAG_IMMUTABLE);
     return pendingIntent;
@@ -282,31 +289,34 @@ public class Utils {
     Account account = getAccount(context);
     if (account != null) {
       String name = account.name;
-      removeAccount(context);
-      createAccount(context, name, null);
+      removeAccount(context,false);
+      createAccount(context, name, null,false);
     }
   }
 
   public static void removeAccount(Context context) {
+    removeAccount(context,true);
+  }
+  public static void removeAccount(Context context,boolean alarm) {
     Log.d(Utils.class.getSimpleName(),"removeAccount");
     Account account = getAccount(context);
     if (account != null) {
       AccountManager accountManager = getAccountManager(context);
 
-      try {
-        String state = readData(context, "state");
-        JSONObject jstate = new JSONObject(state);
-        if (jstate.has("refresh_token_expires_in")) {
-          cancelAlarm(context, jstate.getString("id_token"));
+      if (alarm) {
+        try {
+          String state = readData(context, "state");
+          JSONObject jstate = new JSONObject(state);
+          if (jstate.has("refresh_token_expires_in")) {
+            cancelAlarm(context, jstate.getString("id_token"));
+          }
+        } catch (Exception e) {
+          Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
         }
-      } catch (Exception e) {
-        Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
       }
 
       accountManager.removeAccountExplicitly(account);
     }
-
-
   }
 
   private static AccountManager getAccountManager(Context context) {

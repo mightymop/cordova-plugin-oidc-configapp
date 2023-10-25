@@ -22,7 +22,7 @@ public class Receiver extends BroadcastReceiver {
 
     if (action.equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED)||action.equalsIgnoreCase("de.mopsdom.odic.logout")) {
 
-      Log.i("RECEIVER", "ACTION_BOOT_COMPLETED");
+      Log.i("RECEIVER", action);
       if (Utils.getAccount(context) != null) {
         Log.i("RECEIVER", "Remove account, change Notification");
         Utils.removeAccount(context);
