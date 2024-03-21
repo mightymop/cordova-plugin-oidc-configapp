@@ -30,8 +30,22 @@
 		<uses-permission android:name="android.permission.USE_CREDENTIALS" />
 		
 	</config-file>
-	<config-file target="AndroidManifest.xml" parent="/manifest/application">
 	
+	
+	<config-file target="AndroidManifest.xml" parent="/manifest/application">
+		<activity 
+			android:name="de.mopsdom.oidc.configapp.ForceDeleteAccountActivity"
+            android:exported="true"
+			android:excludeFromRecents="true"
+			android:launchMode="singleInstance"
+            >
+            <intent-filter   
+				android:autoVerify="true"
+                android:priority="999" >
+                <action android:name="de.berlin.sso.FORCE_DELETE_ACCOUNT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
 		<provider
 			android:name="de.mopsdom.oidc.configapp.ConfigProvider"
 			android:authorities="de.mopsdom.oidc.configapp.configprovider"
@@ -69,6 +83,7 @@
 	<source-file src="src/android/NotificationtentService.java" target-dir="src/de/mopsdom/oidc/configapp"/>	
 	<source-file src="src/android/Receiver.java" target-dir="src/de/mopsdom/oidc/configapp"/>	
 	<source-file src="src/android/ConfigProvider.java" target-dir="src/de/mopsdom/oidc/configapp"/>
+	<source-file src="src/android/ForceDeleteAccountActivity.java" target-dir="src/de/mopsdom/oidc/configapp"/>
 	<source-file src="src/android/Utils.java" target-dir="src/de/mopsdom/oidc/configapp"/>
 	
 	<source-file src="src/android/OIDCAuthenticator.java" target-dir="src/de/mopsdom/oidc/authenticator"/>
