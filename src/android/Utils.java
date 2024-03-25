@@ -220,7 +220,7 @@ public class Utils {
     long iat = (Integer) getClaimFromToken(id_token, "iat");
     long alarmTime = iat + refresh_token_expires_in - 60;
     long timeInMillis = alarmTime * 1000;
-    logger.info("SET ALARM TIME="+String.valueOf(timeInMillis)+" "+(new Date(timeInMillis)).toString()+" ID_TOKEN_CHECKSUM="+id_token.split(".")[2]);
+    logger.info("SET ALARM TIME="+String.valueOf(timeInMillis)+" "+(new Date(timeInMillis)).toString()+" ID_TOKEN_CHECKSUM="+id_token.split("\\.")[2]);
     // Zeitpunkt festlegen, zu dem die Aktion ausgeführt werden soll
     alarmManager.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
   }
@@ -229,7 +229,7 @@ public class Utils {
     logger.trace("cancelAlarm");
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pendingIntent = createAlarmIntent(context, id_token);
-    logger.info("CANCEL ALARM ID_TOKEN_CHECKSUM="+id_token.split(".")[2]);
+    logger.info("CANCEL ALARM ID_TOKEN_CHECKSUM="+id_token.split("\\.")[2]);
     // Alarm abbrechen
     alarmManager.cancel(pendingIntent);
   }
