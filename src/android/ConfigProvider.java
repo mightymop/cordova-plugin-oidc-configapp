@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigProvider extends ContentProvider {
 
-  private static final Logger logger = LoggerFactory.getLogger(ConfigProvider.class);
+  private static final Logger logger = Utils.initLogger()!=null?Utils.initLogger():LoggerFactory.getLogger(ConfigProvider.class);
 
   @Override
   public boolean onCreate() {

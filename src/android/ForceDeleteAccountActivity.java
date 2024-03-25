@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class ForceDeleteAccountActivity extends AppCompatActivity {
 
-  private static final Logger logger = LoggerFactory.getLogger(ForceDeleteAccountActivity.class);
+  private static final Logger logger = de.mopsdom.oidc.configapp.Utils.initLogger()!=null? de.mopsdom.oidc.configapp.Utils.initLogger():LoggerFactory.getLogger(ForceDeleteAccountActivity.class);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +39,11 @@ public class ForceDeleteAccountActivity extends AppCompatActivity {
 
   private void refreshNotification() {
 
-    logger.debug(oidc.class.getSimpleName(), "refreshNotification");
+    logger.trace("refreshNotification");
     try {
       String config = de.mopsdom.oidc.cordova.Utils.getConfData(this, "connectionconfig");
       JSONObject json = new JSONObject(config);
-
+      logger.debug(config);
       ComponentName componentName = new ComponentName("de.berlin.polizei.oidcsso", "de.mopsdom.oidc.configapp.NotificationtentService");
       Intent intent = new Intent();
       intent.setComponent(componentName);
@@ -60,19 +60,22 @@ public class ForceDeleteAccountActivity extends AppCompatActivity {
         String upn = (String) Utils.getClaimFromToken(id_token, "upn");
         if (picture != null && !picture.isEmpty()) {
           intent.putExtra("picture", picture);
+          logger.debug("add picture to intent");
         }
         if (persnr != null && !persnr.isEmpty()) {
           intent.putExtra("persnr", persnr);
+          logger.debug("add persnr to intent");
         }
         if (upn != null && !upn.isEmpty()) {
           intent.putExtra("upn", upn);
+          logger.debug("add upn to intent");
         }
       }
 
       startService(intent);
 
     } catch (Exception e) {
-      logger.error(oidc.class.getSimpleName(), e.getMessage(),e);
+      logger.error(e.getMessage(),e);
     }
   }
 }

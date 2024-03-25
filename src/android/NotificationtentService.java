@@ -24,11 +24,11 @@ import org.slf4j.LoggerFactory;
 
 public class NotificationtentService extends Service {
 
-  private static final Logger logger = LoggerFactory.getLogger(NotificationtentService.class);
+  private static final Logger logger = Utils.initLogger()!=null?Utils.initLogger():LoggerFactory.getLogger(NotificationtentService.class);
   private static final int NOTIFICATION_ID = 1;
 
   public static int getIdByName(Context context, String idName) {
-    logger.debug(NotificationtentService.class.getSimpleName(),"getIdByName");
+    logger.trace("getIdByName");
     int resourceId = 0;
 
     try {
@@ -40,7 +40,7 @@ public class NotificationtentService extends Service {
 
   public static void showForegroundNotification(Context context, boolean isauth, Bitmap bmp, String persnr, String upn) {
 
-    logger.debug(NotificationtentService.class.getSimpleName(),"showForegroundNotification");
+    logger.trace("showForegroundNotification");
     RemoteViews customViewBig = new RemoteViews(context.getPackageName(), getLayoutResourceId(context, "notification_layout_large"));
     RemoteViews customViewNormal = new RemoteViews(context.getPackageName(), getLayoutResourceId(context, "notification_layout"));
 
@@ -108,26 +108,26 @@ public class NotificationtentService extends Service {
 
   public static int getLayoutResourceId(Context context, String layoutName) {
 
-    logger.debug(NotificationtentService.class.getSimpleName(),"getLayoutResourceId");
+    logger.trace("getLayoutResourceId");
     return Utils.getIdentifier(context, "layout", layoutName);
   }
 
   public static int getDrawableResourceId(Context context, String layoutName) {
 
-    logger.debug(NotificationtentService.class.getSimpleName(),"getDrawableResourceId");
+    logger.trace("getDrawableResourceId");
     return Utils.getIdentifier(context, "drawable", layoutName);
   }
 
   public static void cancelForegroundNotification(Context context) {
 
-    logger.debug(NotificationtentService.class.getSimpleName(),"cancelForegroundNotification");
+    logger.trace("cancelForegroundNotification");
     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     notificationManager.cancel(NOTIFICATION_ID);
   }
 
   public static Bitmap drawableToBitmap(Drawable drawable) {
 
-    logger.debug(NotificationtentService.class.getSimpleName(),"drawableToBitmap");
+    logger.trace("drawableToBitmap");
     if (drawable instanceof BitmapDrawable) {
       return ((BitmapDrawable) drawable).getBitmap();
     }
@@ -146,14 +146,14 @@ public class NotificationtentService extends Service {
   @Override
   public void onCreate() {
 
-    logger.debug(NotificationtentService.class.getSimpleName(),"onCreate");
+    logger.trace("onCreate");
     super.onCreate();
   }
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
 
-    logger.debug(NotificationtentService.class.getSimpleName(),"onStartCommand");
+    logger.trace("onStartCommand");
     if (intent != null && intent.hasExtra("notify")) {
       if (intent.getBooleanExtra("notify", false)) {
         Bitmap bitmap = null;
@@ -162,6 +162,7 @@ public class NotificationtentService extends Service {
         if (intent.hasExtra("picture")) {
           String picture = intent.getStringExtra("picture");
           if (!picture.isEmpty()) {
+            logger.debug("PICTURE: "+picture);
             decodedBytes = Base64.decode((String) picture, Base64.DEFAULT);
             bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
           }
@@ -184,7 +185,7 @@ public class NotificationtentService extends Service {
 
   @Override
   public IBinder onBind(Intent intent) {
-    logger.debug(NotificationtentService.class.getSimpleName(),"onBind");
+    logger.trace("onBind");
     return null;
   }
 }

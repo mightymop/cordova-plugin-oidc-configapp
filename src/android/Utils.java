@@ -16,12 +16,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.Date;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -32,7 +34,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class Utils {
 
-  private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+  private static final Logger logger = initLogger()!=null?initLogger():LoggerFactory.getLogger(Utils.class);
   public final static String KEY_ISSUER = "ISSUER";
   public final static String KEY_CLIENT_ID = "CLIENT_ID";
   public final static String KEY_REDIRECT_URI = "REDIRECT_URI";
@@ -45,25 +47,25 @@ public class Utils {
   public final static String TAG = Utils.class.getSimpleName();
 
   public static void writeOIDCConfig(Context context, String json) {
-    logger.debug(Utils.class.getSimpleName(),"writeOIDCConfig");
+    logger.trace("writeOIDCConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     authPrefs.edit().putString("oidc", json).apply();
   }
 
   public static String readOIDCConfig(Context context) {
-    logger.debug(Utils.class.getSimpleName(),"readOIDCConfig");
+    logger.trace("readOIDCConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     return authPrefs.getString("oidc", null);
   }
 
   public static void writeConfig(Context context, String json) {
-    logger.debug(Utils.class.getSimpleName(),"writeConfig");
+    logger.trace("writeConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     authPrefs.edit().putString("config", json).apply();
   }
 
   public static String readConfig(Context context) {
-    logger.debug(Utils.class.getSimpleName(),"readConfig");
+    logger.trace("readConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     String config = authPrefs.getString("config", null);
 
@@ -80,9 +82,10 @@ public class Utils {
         jconf.put(KEY_ACCOUNTTYPE.toLowerCase(), getStringRessource(context, "account_type"));
         jconf.put(KEY_NOTIFICATION.toLowerCase(), "true");
 
+        logger.debug("Schreibe config...");
         writeConfig(context, jconf.toString());
       } catch (Exception e) {
-        logger.error(TAG, e.getMessage(), e);
+        logger.error( e.getMessage(), e);
       }
 
       config = authPrefs.getString("config", null);
@@ -92,14 +95,16 @@ public class Utils {
   }
 
   public static String getVal(Context context, String key) {
-    logger.debug(Utils.class.getSimpleName(),"getVal");
+    logger.trace("getVal");
     String jsonconfig = readConfig(context);
     if (jsonconfig != null) {
       try {
         JSONObject config = new JSONObject(jsonconfig);
-        return config.has(key.toLowerCase()) ? config.getString(key.toLowerCase()) : null;
+        String result = config.has(key.toLowerCase()) ? config.getString(key.toLowerCase()) : null;
+        logger.debug("result="+result);
+        return result;
       } catch (Exception e) {
-        logger.error(TAG, e.getMessage(), e);
+        logger.error(e.getMessage(), e);
         return null;
       }
     }
@@ -108,17 +113,18 @@ public class Utils {
   }
 
   public static String readData(Context context, String key) {
-    logger.debug(Utils.class.getSimpleName(),"readData");
+    logger.trace("readData");
     AccountManager accountManager = getAccountManager(context);
     Account account = getAccount(context);
     if (account != null) {
+      logger.debug("Account found");
       return accountManager.getUserData(account, key);
     }
     return null;
   }
 
   public static void setVal(Context context, String key, String val) {
-    logger.debug(Utils.class.getSimpleName(),"setVal");
+    logger.trace("setVal");
     String jsonconfig = readConfig(context);
 
     JSONObject config;
@@ -128,7 +134,7 @@ public class Utils {
       try {
         config = new JSONObject(jsonconfig);
       } catch (Exception e) {
-        logger.error(TAG, e.getMessage(), e);
+        logger.error(e.getMessage(), e);
         config = new JSONObject();
       }
     }
@@ -136,14 +142,14 @@ public class Utils {
     try {
       config.put(key.toLowerCase(), val);
     } catch (JSONException e) {
-      logger.error(TAG, e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
 
     writeConfig(context, config.toString());
   }
 
   public static int getIdentifier(Context context, String kategorie, String name) {
-    logger.debug(Utils.class.getSimpleName(),"getIdentifier");
+    logger.trace("getIdentifier");
     int resourceId = 0;
 
     try {
@@ -156,7 +162,7 @@ public class Utils {
   }
 
   public static String getStringRessource(Context context, String resourceName) {
-    logger.debug(Utils.class.getSimpleName(),"getStringRessource");
+    logger.trace("getStringRessource");
     int resourceId = context.getResources().getIdentifier(resourceName, "string", context.getPackageName());
 
     if (resourceId != 0) {
@@ -170,7 +176,7 @@ public class Utils {
     return createAccount(context,username,state,true);
   }
   public static boolean createAccount(Context context, String username, String state, boolean alarm) {
-    logger.debug(Utils.class.getSimpleName(),"createAccount");
+    logger.trace("createAccount");
     Account account = getAccount(context);
 
     if (account != null) {
@@ -188,7 +194,7 @@ public class Utils {
           createAlarm(context, jstate.getString("id_token"), jstate.getInt("refresh_token_expires_in"));
         }
       } catch (Exception e) {
-        logger.error(Utils.class.getSimpleName(), e.getMessage(), e);
+        logger.error(e.getMessage(), e);
       }
     }
 
@@ -196,7 +202,7 @@ public class Utils {
   }
 
   private static PendingIntent createAlarmIntent(Context context, String id_token) {
-    logger.debug(Utils.class.getSimpleName(),"createAlarmIntent");
+    logger.trace("createAlarmIntent");
     Intent alarmIntent = new Intent(context, Receiver.class); // Ersetze YourReceiver durch den Namen deines Broadcast Receivers
 
     String issuer = (String) getClaimFromToken(id_token,"iss");
@@ -207,40 +213,51 @@ public class Utils {
   }
 
   private static void createAlarm(Context context, String id_token, int refresh_token_expires_in) {
-    logger.debug(Utils.class.getSimpleName(),"createAlarm");
+    logger.trace("createAlarm");
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pendingIntent = createAlarmIntent(context, id_token);
 
     long iat = (Integer) getClaimFromToken(id_token, "iat");
     long alarmTime = iat + refresh_token_expires_in - 60;
     long timeInMillis = alarmTime * 1000;
-
+    logger.info("SET ALARM TIME="+String.valueOf(timeInMillis)+" "+(new Date(timeInMillis)).toString()+" ID_TOKEN_CHECKSUM="+id_token.split(".")[2]);
     // Zeitpunkt festlegen, zu dem die Aktion ausgeführt werden soll
     alarmManager.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
   }
 
   private static void cancelAlarm(Context context, String id_token) {
-    logger.debug(Utils.class.getSimpleName(),"cancelAlarm");
+    logger.trace("cancelAlarm");
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pendingIntent = createAlarmIntent(context, id_token);
-
+    logger.info("CANCEL ALARM ID_TOKEN_CHECKSUM="+id_token.split(".")[2]);
     // Alarm abbrechen
     alarmManager.cancel(pendingIntent);
   }
 
+  public static Logger initLogger()
+  {
+    File logBackFile = new File("/sdcard/Android/data/de.berlin.polizei.oidcsso/files/logs/logback.xml");
+
+    if (logBackFile != null) {
+      System.setProperty("logback.configurationFile", logBackFile.getAbsolutePath());
+      return LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    }
+    return null;
+  }
+
   public static Object getClaimFromToken(String id_token, String claim) {
-    logger.debug(Utils.class.getSimpleName(),"getClaimFromToken");
+    logger.trace("getClaimFromToken");
     JSONObject payload = getPayload(id_token);
     try {
       return payload.get(claim);
     } catch (Exception e) {
-      logger.error(TAG, e.getMessage());
+      logger.error( e.getMessage());
       return null;
     }
   }
 
   public static JSONObject getPayload(String token) {
-    logger.debug(Utils.class.getSimpleName(),"getPayload");
+    logger.trace("getPayload");
 
     String[] parts = token.split("\\.");
     String decodedString = decodeBase64(parts[1]);
@@ -249,7 +266,7 @@ public class Utils {
     try {
       payload = new JSONObject(decodedString);
     } catch (JSONException e) {
-      logger.error(TAG, e.getMessage());
+      logger.error( e.getMessage());
       return null;
     }
 
@@ -257,7 +274,7 @@ public class Utils {
   }
 
   private static String decodeBase64(String data) {
-    logger.debug(Utils.class.getSimpleName(),"decodeBase64");
+    logger.trace("decodeBase64");
     byte[] result = null;
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
       result = Base64.getDecoder().decode(data);
@@ -268,7 +285,7 @@ public class Utils {
   }
 
   public static String getAccountType(Context context) {
-    logger.debug(Utils.class.getSimpleName(),"getAccountType");
+    logger.trace("getAccountType");
     String accounttype = getVal(context, KEY_ACCOUNTTYPE);
     if (accounttype == null) {
       accounttype = getStringRessource(context, "account_type");
@@ -278,7 +295,7 @@ public class Utils {
   }
 
   public static void writeData(Context context, String key, String data) {
-    logger.debug(Utils.class.getSimpleName(),"writeData");
+    logger.trace("writeData");
     AccountManager accountManager = getAccountManager(context);
     Account account = getAccount(context);
     if (account != null) {
@@ -287,7 +304,7 @@ public class Utils {
   }
 
   public static void clear(Context context) {
-    logger.debug(Utils.class.getSimpleName(),"clear");
+    logger.trace("clear");
     Account account = getAccount(context);
     if (account != null) {
       String name = account.name;
@@ -300,7 +317,7 @@ public class Utils {
     removeAccount(context,true);
   }
   public static void removeAccount(Context context,boolean alarm) {
-    logger.debug(Utils.class.getSimpleName(),"removeAccount");
+    logger.trace("removeAccount");
     Account account = getAccount(context);
     if (account != null) {
       AccountManager accountManager = getAccountManager(context);
@@ -313,7 +330,7 @@ public class Utils {
             cancelAlarm(context, jstate.getString("id_token"));
           }
         } catch (Exception e) {
-          logger.error(Utils.class.getSimpleName(), e.getMessage(), e);
+          logger.error(e.getMessage(), e);
         }
       }
 
@@ -322,12 +339,12 @@ public class Utils {
   }
 
   private static AccountManager getAccountManager(Context context) {
-    logger.debug(Utils.class.getSimpleName(),"getAccountManager");
+    logger.trace("getAccountManager");
     return context.getSystemService(AccountManager.class);
   }
 
   public static Account getAccount(Context context) {
-    logger.debug(Utils.class.getSimpleName(),"getAccount");
+    logger.trace("getAccount");
     Account[] result = getAccountManager(context).getAccountsByType(getAccountType(context));
     if (result != null && result.length > 0) {
       return result[0];
@@ -336,7 +353,7 @@ public class Utils {
   }
 
   public static String loadOpenIDConfiguration(String issuerUrl) throws Exception {
-    logger.debug(Utils.class.getSimpleName(),"loadOpenIDConfiguration");
+    logger.trace("loadOpenIDConfiguration");
     // Ignorieren von SSL-Fehlern
     disableSSLCertificateValidation();
 
@@ -358,7 +375,7 @@ public class Utils {
   }
 
   public static void disableSSLCertificateValidation() throws Exception {
-    logger.debug(Utils.class.getSimpleName(),"disableSSLCertificateValidation");
+    logger.trace("disableSSLCertificateValidation");
     TrustManager[] trustAllCertificates = new TrustManager[]{
       new X509TrustManager() {
         public X509Certificate[] getAcceptedIssuers() {

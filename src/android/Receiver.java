@@ -14,18 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 public class Receiver extends BroadcastReceiver {
 
-  private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
+  private static final Logger logger = Utils.initLogger()!=null?Utils.initLogger():LoggerFactory.getLogger(Receiver.class);
 
   @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
 
-    logger.info(Receiver.class.getSimpleName(), "onReceive**********************************************");
+    logger.trace("onReceive**********************************************");
+    logger.debug("ACTION="+action);
 
     if (action.equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED)||action.equalsIgnoreCase("de.mopsdom.odic.logout")) {
 
-      logger.info("RECEIVER", action);
       if (Utils.getAccount(context) != null) {
         logger.info("RECEIVER", "Remove account, change Notification");
         Utils.removeAccount(context);
@@ -41,7 +41,7 @@ public class Receiver extends BroadcastReceiver {
     if (action.equalsIgnoreCase(Intent.ACTION_PACKAGE_ADDED) ||
       action.equalsIgnoreCase(Intent.ACTION_PACKAGE_DATA_CLEARED) ||
       action.equalsIgnoreCase(Intent.ACTION_PACKAGE_REPLACED)) {
-      logger.info("RECEIVER", "ACTION_PACKAGE_ADDED||ACTION_PACKAGE_DATA_CLEARED||ACTION_PACKAGE_REPLACED");
+      logger.debug("RECEIVER", "ACTION_PACKAGE_ADDED||ACTION_PACKAGE_DATA_CLEARED||ACTION_PACKAGE_REPLACED");
       Uri dataUri = intent.getData();
 
       if (dataUri != null) {
@@ -62,6 +62,10 @@ public class Receiver extends BroadcastReceiver {
             }
           }
         }
+      }
+      else
+      {
+        logger.info("no datauri found!");
       }
     }
   }
