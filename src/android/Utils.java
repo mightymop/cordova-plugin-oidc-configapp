@@ -9,8 +9,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +32,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class Utils {
 
+  private static final Logger logger = LoggerFactory.getLogger(Utils.class);
   public final static String KEY_ISSUER = "ISSUER";
   public final static String KEY_CLIENT_ID = "CLIENT_ID";
   public final static String KEY_REDIRECT_URI = "REDIRECT_URI";
@@ -43,25 +45,25 @@ public class Utils {
   public final static String TAG = Utils.class.getSimpleName();
 
   public static void writeOIDCConfig(Context context, String json) {
-    Log.d(Utils.class.getSimpleName(),"writeOIDCConfig");
+    logger.debug(Utils.class.getSimpleName(),"writeOIDCConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     authPrefs.edit().putString("oidc", json).apply();
   }
 
   public static String readOIDCConfig(Context context) {
-    Log.d(Utils.class.getSimpleName(),"readOIDCConfig");
+    logger.debug(Utils.class.getSimpleName(),"readOIDCConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     return authPrefs.getString("oidc", null);
   }
 
   public static void writeConfig(Context context, String json) {
-    Log.d(Utils.class.getSimpleName(),"writeConfig");
+    logger.debug(Utils.class.getSimpleName(),"writeConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     authPrefs.edit().putString("config", json).apply();
   }
 
   public static String readConfig(Context context) {
-    Log.d(Utils.class.getSimpleName(),"readConfig");
+    logger.debug(Utils.class.getSimpleName(),"readConfig");
     SharedPreferences authPrefs = context.getSharedPreferences("auth", MODE_PRIVATE);
     String config = authPrefs.getString("config", null);
 
@@ -80,7 +82,7 @@ public class Utils {
 
         writeConfig(context, jconf.toString());
       } catch (Exception e) {
-        Log.e(TAG, e.getMessage(), e);
+        logger.error(TAG, e.getMessage(), e);
       }
 
       config = authPrefs.getString("config", null);
@@ -90,14 +92,14 @@ public class Utils {
   }
 
   public static String getVal(Context context, String key) {
-    Log.d(Utils.class.getSimpleName(),"getVal");
+    logger.debug(Utils.class.getSimpleName(),"getVal");
     String jsonconfig = readConfig(context);
     if (jsonconfig != null) {
       try {
         JSONObject config = new JSONObject(jsonconfig);
         return config.has(key.toLowerCase()) ? config.getString(key.toLowerCase()) : null;
       } catch (Exception e) {
-        Log.e(TAG, e.getMessage(), e);
+        logger.error(TAG, e.getMessage(), e);
         return null;
       }
     }
@@ -106,7 +108,7 @@ public class Utils {
   }
 
   public static String readData(Context context, String key) {
-    Log.d(Utils.class.getSimpleName(),"readData");
+    logger.debug(Utils.class.getSimpleName(),"readData");
     AccountManager accountManager = getAccountManager(context);
     Account account = getAccount(context);
     if (account != null) {
@@ -116,7 +118,7 @@ public class Utils {
   }
 
   public static void setVal(Context context, String key, String val) {
-    Log.d(Utils.class.getSimpleName(),"setVal");
+    logger.debug(Utils.class.getSimpleName(),"setVal");
     String jsonconfig = readConfig(context);
 
     JSONObject config;
@@ -126,7 +128,7 @@ public class Utils {
       try {
         config = new JSONObject(jsonconfig);
       } catch (Exception e) {
-        Log.e(TAG, e.getMessage(), e);
+        logger.error(TAG, e.getMessage(), e);
         config = new JSONObject();
       }
     }
@@ -134,14 +136,14 @@ public class Utils {
     try {
       config.put(key.toLowerCase(), val);
     } catch (JSONException e) {
-      Log.e(TAG, e.getMessage(), e);
+      logger.error(TAG, e.getMessage(), e);
     }
 
     writeConfig(context, config.toString());
   }
 
   public static int getIdentifier(Context context, String kategorie, String name) {
-    Log.d(Utils.class.getSimpleName(),"getIdentifier");
+    logger.debug(Utils.class.getSimpleName(),"getIdentifier");
     int resourceId = 0;
 
     try {
@@ -154,7 +156,7 @@ public class Utils {
   }
 
   public static String getStringRessource(Context context, String resourceName) {
-    Log.d(Utils.class.getSimpleName(),"getStringRessource");
+    logger.debug(Utils.class.getSimpleName(),"getStringRessource");
     int resourceId = context.getResources().getIdentifier(resourceName, "string", context.getPackageName());
 
     if (resourceId != 0) {
@@ -168,7 +170,7 @@ public class Utils {
     return createAccount(context,username,state,true);
   }
   public static boolean createAccount(Context context, String username, String state, boolean alarm) {
-    Log.d(Utils.class.getSimpleName(),"createAccount");
+    logger.debug(Utils.class.getSimpleName(),"createAccount");
     Account account = getAccount(context);
 
     if (account != null) {
@@ -186,7 +188,7 @@ public class Utils {
           createAlarm(context, jstate.getString("id_token"), jstate.getInt("refresh_token_expires_in"));
         }
       } catch (Exception e) {
-        Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
+        logger.error(Utils.class.getSimpleName(), e.getMessage(), e);
       }
     }
 
@@ -194,7 +196,7 @@ public class Utils {
   }
 
   private static PendingIntent createAlarmIntent(Context context, String id_token) {
-    Log.d(Utils.class.getSimpleName(),"createAlarmIntent");
+    logger.debug(Utils.class.getSimpleName(),"createAlarmIntent");
     Intent alarmIntent = new Intent(context, Receiver.class); // Ersetze YourReceiver durch den Namen deines Broadcast Receivers
 
     String issuer = (String) getClaimFromToken(id_token,"iss");
@@ -205,7 +207,7 @@ public class Utils {
   }
 
   private static void createAlarm(Context context, String id_token, int refresh_token_expires_in) {
-    Log.d(Utils.class.getSimpleName(),"createAlarm");
+    logger.debug(Utils.class.getSimpleName(),"createAlarm");
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pendingIntent = createAlarmIntent(context, id_token);
 
@@ -218,7 +220,7 @@ public class Utils {
   }
 
   private static void cancelAlarm(Context context, String id_token) {
-    Log.d(Utils.class.getSimpleName(),"cancelAlarm");
+    logger.debug(Utils.class.getSimpleName(),"cancelAlarm");
     AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     PendingIntent pendingIntent = createAlarmIntent(context, id_token);
 
@@ -227,18 +229,18 @@ public class Utils {
   }
 
   public static Object getClaimFromToken(String id_token, String claim) {
-    Log.d(Utils.class.getSimpleName(),"getClaimFromToken");
+    logger.debug(Utils.class.getSimpleName(),"getClaimFromToken");
     JSONObject payload = getPayload(id_token);
     try {
       return payload.get(claim);
     } catch (Exception e) {
-      Log.e(TAG, e.getMessage());
+      logger.error(TAG, e.getMessage());
       return null;
     }
   }
 
   public static JSONObject getPayload(String token) {
-    Log.d(Utils.class.getSimpleName(),"getPayload");
+    logger.debug(Utils.class.getSimpleName(),"getPayload");
 
     String[] parts = token.split("\\.");
     String decodedString = decodeBase64(parts[1]);
@@ -247,7 +249,7 @@ public class Utils {
     try {
       payload = new JSONObject(decodedString);
     } catch (JSONException e) {
-      Log.e(TAG, e.getMessage());
+      logger.error(TAG, e.getMessage());
       return null;
     }
 
@@ -255,7 +257,7 @@ public class Utils {
   }
 
   private static String decodeBase64(String data) {
-    Log.d(Utils.class.getSimpleName(),"decodeBase64");
+    logger.debug(Utils.class.getSimpleName(),"decodeBase64");
     byte[] result = null;
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
       result = Base64.getDecoder().decode(data);
@@ -266,7 +268,7 @@ public class Utils {
   }
 
   public static String getAccountType(Context context) {
-    Log.d(Utils.class.getSimpleName(),"getAccountType");
+    logger.debug(Utils.class.getSimpleName(),"getAccountType");
     String accounttype = getVal(context, KEY_ACCOUNTTYPE);
     if (accounttype == null) {
       accounttype = getStringRessource(context, "account_type");
@@ -276,7 +278,7 @@ public class Utils {
   }
 
   public static void writeData(Context context, String key, String data) {
-    Log.d(Utils.class.getSimpleName(),"writeData");
+    logger.debug(Utils.class.getSimpleName(),"writeData");
     AccountManager accountManager = getAccountManager(context);
     Account account = getAccount(context);
     if (account != null) {
@@ -285,7 +287,7 @@ public class Utils {
   }
 
   public static void clear(Context context) {
-    Log.d(Utils.class.getSimpleName(),"clear");
+    logger.debug(Utils.class.getSimpleName(),"clear");
     Account account = getAccount(context);
     if (account != null) {
       String name = account.name;
@@ -298,7 +300,7 @@ public class Utils {
     removeAccount(context,true);
   }
   public static void removeAccount(Context context,boolean alarm) {
-    Log.d(Utils.class.getSimpleName(),"removeAccount");
+    logger.debug(Utils.class.getSimpleName(),"removeAccount");
     Account account = getAccount(context);
     if (account != null) {
       AccountManager accountManager = getAccountManager(context);
@@ -311,7 +313,7 @@ public class Utils {
             cancelAlarm(context, jstate.getString("id_token"));
           }
         } catch (Exception e) {
-          Log.e(Utils.class.getSimpleName(), e.getMessage(), e);
+          logger.error(Utils.class.getSimpleName(), e.getMessage(), e);
         }
       }
 
@@ -320,12 +322,12 @@ public class Utils {
   }
 
   private static AccountManager getAccountManager(Context context) {
-    Log.d(Utils.class.getSimpleName(),"getAccountManager");
+    logger.debug(Utils.class.getSimpleName(),"getAccountManager");
     return context.getSystemService(AccountManager.class);
   }
 
   public static Account getAccount(Context context) {
-    Log.d(Utils.class.getSimpleName(),"getAccount");
+    logger.debug(Utils.class.getSimpleName(),"getAccount");
     Account[] result = getAccountManager(context).getAccountsByType(getAccountType(context));
     if (result != null && result.length > 0) {
       return result[0];
@@ -334,7 +336,7 @@ public class Utils {
   }
 
   public static String loadOpenIDConfiguration(String issuerUrl) throws Exception {
-    Log.d(Utils.class.getSimpleName(),"loadOpenIDConfiguration");
+    logger.debug(Utils.class.getSimpleName(),"loadOpenIDConfiguration");
     // Ignorieren von SSL-Fehlern
     disableSSLCertificateValidation();
 
@@ -356,7 +358,7 @@ public class Utils {
   }
 
   public static void disableSSLCertificateValidation() throws Exception {
-    Log.d(Utils.class.getSimpleName(),"disableSSLCertificateValidation");
+    logger.debug(Utils.class.getSimpleName(),"disableSSLCertificateValidation");
     TrustManager[] trustAllCertificates = new TrustManager[]{
       new X509TrustManager() {
         public X509Certificate[] getAcceptedIssuers() {

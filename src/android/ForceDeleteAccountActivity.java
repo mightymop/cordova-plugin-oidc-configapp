@@ -5,14 +5,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import org.json.JSONObject;
 
 import de.mopsdom.oidc.cordova.Utils;
 import de.mopsdom.oidc.cordova.oidc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 public class ForceDeleteAccountActivity extends AppCompatActivity {
+
+  private static final Logger logger = LoggerFactory.getLogger(ForceDeleteAccountActivity.class);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +39,7 @@ public class ForceDeleteAccountActivity extends AppCompatActivity {
 
   private void refreshNotification() {
 
-    Log.d(oidc.class.getSimpleName(), "refreshNotification");
+    logger.debug(oidc.class.getSimpleName(), "refreshNotification");
     try {
       String config = de.mopsdom.oidc.cordova.Utils.getConfData(this, "connectionconfig");
       JSONObject json = new JSONObject(config);
@@ -67,7 +72,7 @@ public class ForceDeleteAccountActivity extends AppCompatActivity {
       startService(intent);
 
     } catch (Exception e) {
-      Log.e(oidc.class.getSimpleName(), e.getMessage(),e);
+      logger.error(oidc.class.getSimpleName(), e.getMessage(),e);
     }
   }
 }

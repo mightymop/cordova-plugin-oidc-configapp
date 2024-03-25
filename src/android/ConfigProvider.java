@@ -5,20 +5,25 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.util.Log;
 
 import org.json.JSONObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ConfigProvider extends ContentProvider {
+
+  private static final Logger logger = LoggerFactory.getLogger(ConfigProvider.class);
 
   @Override
   public boolean onCreate() {
-    Log.d(NotificationtentService.class.getSimpleName(),"onCreate");
+
+    logger.debug(NotificationtentService.class.getSimpleName(),"onCreate");
     String connectionConfig = Utils.readConfig(getContext());
     String configString = Utils.readOIDCConfig(getContext());
 
-    Log.i(ConfigProvider.class.getSimpleName(), connectionConfig != null ? connectionConfig : "NULL");
-    Log.i(ConfigProvider.class.getSimpleName(), configString != null ? configString : "NULL");
+    logger.info(ConfigProvider.class.getSimpleName(), connectionConfig != null ? connectionConfig : "NULL");
+    logger.info(ConfigProvider.class.getSimpleName(), configString != null ? configString : "NULL");
 
     loadConfig(connectionConfig, configString);
 
@@ -27,7 +32,7 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-    Log.d(NotificationtentService.class.getSimpleName(),"query");
+    logger.debug(NotificationtentService.class.getSimpleName(),"query");
     String result = "";
     String[] columnNames=null;
     if (uri.getPath().startsWith("/config")) {
@@ -52,14 +57,14 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public String getType(Uri uri) {
-    Log.d(NotificationtentService.class.getSimpleName(),"getType");
+    logger.debug(NotificationtentService.class.getSimpleName(),"getType");
 
     return "application/json";
   }
 
   @Override
   public Uri insert(Uri uri, ContentValues values) {
-    Log.d(NotificationtentService.class.getSimpleName(),"insert");
+    logger.debug(NotificationtentService.class.getSimpleName(),"insert");
     if (uri.getPath().startsWith("/connectionconfig")) {
       update(uri, values, null, null);
     } else if (uri.getPath().startsWith("/config")) {
@@ -77,7 +82,7 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-    Log.d(NotificationtentService.class.getSimpleName(),"update");
+    logger.debug(NotificationtentService.class.getSimpleName(),"update");
     if (uri.getPath().startsWith("/connectionconfig")) {
       if (values.containsKey("config")) {
         String config = values.getAsString("config");
@@ -100,7 +105,7 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public int delete(Uri uri, String selection, String[] selectionArgs) {
-    Log.d(NotificationtentService.class.getSimpleName(),"delete");
+    logger.debug(NotificationtentService.class.getSimpleName(),"delete");
     if (uri.getPath().startsWith("/account")) {
       Utils.removeAccount(getContext());
       return 1;
@@ -109,7 +114,7 @@ public class ConfigProvider extends ContentProvider {
   }
 
   private void loadConfig(String connectionConfig, String configString) {
-    Log.d(NotificationtentService.class.getSimpleName(),"loadConfig");
+    logger.debug(NotificationtentService.class.getSimpleName(),"loadConfig");
     if ((configString == null || configString.isEmpty()) && connectionConfig != null && !connectionConfig.isEmpty()) {
       Thread t = new Thread(new Runnable() {
         @Override
@@ -120,7 +125,7 @@ public class ConfigProvider extends ContentProvider {
             JSONObject json = new JSONObject(connectionConfig);
             issuer = json.getString("issuer");
           } catch (Exception e) {
-            Log.e(ConfigProvider.class.getSimpleName(), e.getMessage());
+            logger.error(ConfigProvider.class.getSimpleName(), e.getMessage());
             return;
           }
 
@@ -133,7 +138,7 @@ public class ConfigProvider extends ContentProvider {
             }
 
           } catch (Exception e) {
-            Log.e(ConfigProvider.class.getSimpleName(), e.getMessage());
+            logger.error(ConfigProvider.class.getSimpleName(), e.getMessage());
           }
         }
       });
@@ -142,7 +147,7 @@ public class ConfigProvider extends ContentProvider {
       try {
         t.join();
       } catch (InterruptedException e) {
-        Log.e(ConfigProvider.class.getSimpleName(), e.getMessage());
+        logger.error(ConfigProvider.class.getSimpleName(), e.getMessage());
       }
     }
   }

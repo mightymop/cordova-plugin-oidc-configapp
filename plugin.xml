@@ -8,16 +8,25 @@
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
   </engines>
+  
+  <js-module src="www/oidcconfigapp.js" name="oidcconfigapp">
+     <clobbers target="oidcconfigapp" />
+  </js-module>
 
   <platform name="android">
     <framework src="androidx.browser:browser:1.5.0" />
+	<framework src="org.slf4j:slf4j-api:2.0.7" />
+	<framework src="com.github.tony19:logback-android:3.0.0" />
+
     <config-file target="res/xml/config.xml" parent="/*">		  
-      <!--feature name="oidcconfigapp">
-        <param name="android-package" value="de.mopsdom.oidc.cordova.oidcconfigapp"/>
-      </feature-->	  	
+      <feature name="oidcconfigapp">
+        <param name="android-package" value="de.mopsdom.oidc.configapp.oidcconfigapp"/>
+      </feature>	  	
     </config-file>
 	<config-file target="AndroidManifest.xml" parent="/*">
-		<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+		<uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> 
+		<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+       
 		<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 		<uses-permission android:name="android.permission.INTERNET" />
 		<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -97,6 +106,10 @@
 	<source-file src="src/android/notification_layout_large.xml" target-dir="res/layout"/>
 	<source-file src="src/android/strings_oidc.xml" target-dir="res/values"/>
 	<source-file src="src/android/baseline_account_circle_24.xml" target-dir="res/drawable" />
+	
+	<source-file src="src/android/logback.xml" target-dir="src/main/assets" />
+	<source-file src="src/android/oidcconfigapp.java" target-dir="src/de/mopsdom/oidc/configapp" />
+	
   </platform>
 
 
