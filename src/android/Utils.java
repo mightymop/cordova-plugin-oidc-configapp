@@ -45,6 +45,8 @@ public class Utils {
   public final static String KEY_NOTIFICATION = "NOTIFICATION";
   public final static String KEY_AUTOLOGOUT = "AUTOLOGOUT";
 
+  private static final int ALARM_ID = 110011;
+
   public final static String TAG = Utils.class.getSimpleName();
 
   public static void writeOIDCConfig(Context context, String json) {
@@ -219,7 +221,7 @@ public class Utils {
     String issuer = (String) getClaimFromToken(id_token,"iss");
     alarmIntent.putExtra("issuer", issuer);
     alarmIntent.setAction("de.mopsdom.odic.logout");
-    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, alarmIntent.hashCode(), alarmIntent, PendingIntent.FLAG_IMMUTABLE);
+    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_ID, alarmIntent, PendingIntent.FLAG_IMMUTABLE);
     return pendingIntent;
   }
 
@@ -233,7 +235,7 @@ public class Utils {
     long timeInMillis = alarmTime * 1000;
     logger.info("SET ALARM TIME="+String.valueOf(timeInMillis)+" "+(new Date(timeInMillis)).toString()+" ID_TOKEN_CHECKSUM="+id_token.split("\\.")[2]);
     // Zeitpunkt festlegen, zu dem die Aktion ausgeführt werden soll
-    alarmManager.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+    alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
   }
 
   private static void cancelAlarm(Context context, String id_token) {
