@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import android.content.Context;
 import android.util.Log;
@@ -16,18 +15,15 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginResult;
-import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.json.JSONArray;
 
 
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.util.ContextInitializer;
 import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.status.StatusManager;
 import de.berlin.polizei.oidcsso.BuildConfig;
-import de.berlin.polizei.oidcsso.R;
 
 public class oidcconfigapp extends CordovaPlugin {
 
