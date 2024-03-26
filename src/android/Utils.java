@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,7 @@ public class Utils {
   public final static String KEY_ACCOUNTTYPE = "ACCOUNTTYPE";
   public final static String KEY_SCOPE = "SCOPE";
   public final static String KEY_NOTIFICATION = "NOTIFICATION";
+  public final static String KEY_AUTOLOGOUT = "AUTOLOGOUT";
 
   public final static String TAG = Utils.class.getSimpleName();
 
@@ -81,6 +83,7 @@ public class Utils {
         jconf.put(KEY_LOGOUT_REDIRECT_URI.toLowerCase(), getStringRessource(context, "default_redirect_uri_logout"));
         jconf.put(KEY_ACCOUNTTYPE.toLowerCase(), getStringRessource(context, "account_type"));
         jconf.put(KEY_NOTIFICATION.toLowerCase(), "true");
+        jconf.put(KEY_AUTOLOGOUT.toLowerCase(), "false");
 
         logger.debug("Schreibe config...");
         writeConfig(context, jconf.toString());
@@ -173,7 +176,10 @@ public class Utils {
   }
 
   public static boolean createAccount(Context context, String username, String state) {
-    return createAccount(context,username,state,true);
+    String autoLogout = getVal(context, KEY_AUTOLOGOUT.toLowerCase());
+    boolean  val = autoLogout=="true"?true:false;
+    logger.debug("AUTOLOGOUT ON CREATE ALARM = "+autoLogout);
+    return createAccount(context,username,state,val);
   }
   public static boolean createAccount(Context context, String username, String state, boolean alarm) {
     logger.trace("createAccount");
@@ -188,10 +194,16 @@ public class Utils {
     accountManager.addAccountExplicitly(account, null, null);
     writeData(context, "state", state);
     if (alarm) {
+      logger.debug("CREATE ALARM...");
       try {
         JSONObject jstate = new JSONObject(state);
         if (jstate.has("refresh_token_expires_in")) {
+          logger.debug("found refresh_token_expires_in, using id_token");
           createAlarm(context, jstate.getString("id_token"), jstate.getInt("refresh_token_expires_in"));
+        }
+        else
+        {
+          logger.debug("did not found refresh_token_expires_in");
         }
       } catch (Exception e) {
         logger.error(e.getMessage(), e);
@@ -302,16 +314,18 @@ public class Utils {
       accountManager.setUserData(account, key, data);
     }
   }
-
+/*
   public static void clear(Context context) {
     logger.trace("clear");
     Account account = getAccount(context);
     if (account != null) {
       String name = account.name;
+
+      AccountManager am = getAccountManager(context);
       removeAccount(context,false);
       createAccount(context, name, null,false);
     }
-  }
+  }*/
 
   public static void removeAccount(Context context) {
     removeAccount(context,true);
@@ -323,15 +337,25 @@ public class Utils {
       AccountManager accountManager = getAccountManager(context);
 
       if (alarm) {
+        logger.debug("disable Alarm");
         try {
           String state = readData(context, "state");
           JSONObject jstate = new JSONObject(state);
           if (jstate.has("refresh_token_expires_in")) {
+            logger.debug("found refresh_token_expires_in, using id_token");
             cancelAlarm(context, jstate.getString("id_token"));
+          }
+          else
+          {
+            logger.debug("did not found refresh_token_expires_in");
           }
         } catch (Exception e) {
           logger.error(e.getMessage(), e);
         }
+      }
+      else
+      {
+        logger.debug("Alarm was not disabled");
       }
 
       accountManager.removeAccountExplicitly(account);
@@ -347,8 +371,10 @@ public class Utils {
     logger.trace("getAccount");
     Account[] result = getAccountManager(context).getAccountsByType(getAccountType(context));
     if (result != null && result.length > 0) {
+      logger.debug("Found Account = "+result[0].name);
       return result[0];
     }
+    logger.debug("Account not found!");
     return null;
   }
 

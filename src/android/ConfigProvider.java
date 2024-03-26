@@ -105,8 +105,9 @@ public class ConfigProvider extends ContentProvider {
 
   @Override
   public int delete(Uri uri, String selection, String[] selectionArgs) {
-    logger.debug(NotificationtentService.class.getSimpleName(),"delete");
+    logger.debug("delete");
     if (uri.getPath().startsWith("/account")) {
+      logger.debug("DELETE ACCOUNT (ConfigProvider) URi="+uri.toString());
       Utils.removeAccount(getContext());
       return 1;
     }

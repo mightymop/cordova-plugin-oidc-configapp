@@ -31,8 +31,10 @@ public class Receiver extends BroadcastReceiver {
         Utils.removeAccount(context);
         String notiCfg = Utils.getVal(context, Utils.KEY_NOTIFICATION);
         if (notiCfg.equalsIgnoreCase("true") || notiCfg.equalsIgnoreCase("1")) {
+          logger.debug("showForegroundNotification");
           NotificationtentService.showForegroundNotification(context, false, null, null, null);
         } else {
+          logger.debug("cancelForegroundNotification");
           NotificationtentService.cancelForegroundNotification(context);
         }
       }
@@ -56,8 +58,10 @@ public class Receiver extends BroadcastReceiver {
             Utils.removeAccount(context);
             String notiCfg = Utils.getVal(context, Utils.KEY_NOTIFICATION);
             if (notiCfg.equalsIgnoreCase("true") || notiCfg.equalsIgnoreCase("1")) {
+              logger.debug("showForegroundNotification");
               NotificationtentService.showForegroundNotification(context, false, null, null, null);
             } else {
+              logger.debug("cancelForegroundNotification");
               NotificationtentService.cancelForegroundNotification(context);
             }
           }
